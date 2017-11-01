@@ -7,6 +7,8 @@ readImputedGds <- function(gdsfile, scanfile, snpfile, infofile){
         
         # read genotype
         gds <- GdsGenotypeReader(gdsfile)
+        # close gds file on exit of the function
+        on.exit(close(gds))
         # read in snp data
         snpAnnot <- getobj(snpfile)
         # read scan
@@ -54,10 +56,10 @@ readImputedGds <- function(gdsfile, scanfile, snpfile, infofile){
         # assign names (so summarizedexperiment object has colnames and rownames filled out)
         dimnames(genotypes) <- list(snp$rsID, scan$ID_2)
         
-        assay.name <- as.character(gsub(".gds", "", gdsfile))
+        chunk.name <- as.character(gsub(".gds", "", gdsfile))
         
         # put into summarizedexperiment 
-        se <- SummarizedExperiment(assays=list(input.files=genotypes),
+        se <- SummarizedExperiment(assays=setNames(list(genotypes), chunk.name),
                                    colData=scan,
                                    rowRanges=snp)
         return(se)
